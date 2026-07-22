@@ -1,0 +1,26 @@
+name: Auto-merge
+
+# Enables GitHub NATIVE auto-merge (arms the merge queue) on eligible, trusted-author PRs;
+# never force-merges. Uses pull_request_target (base-repo context, write token) but never
+# checks out PR code — only reads the event payload and calls the API. The org default
+# required-gates list names checks that don't exist in this repo, so override with the
+# real check names instead of inheriting the dead default. suxdash's CI job is named
+# "Type-check & test" — see this repo's ci.yml. Must stay in lock-step with pr-drain.yml's
+# list and the main-branch ruleset.
+# Reusable workflow: SuxOS/.github/.github/workflows/automerge.yml
+
+on:
+  pull_request_target:
+    types: [opened, reopened, ready_for_review, synchronize, labeled, unlabeled, edited]
+
+jobs:
+  enable-automerge:
+    permissions:
+      contents: write
+      pull-requests: write
+    uses: SuxOS/.github/.github/workflows/automerge.yml@main
+    with:
+      required-gates: |
+        Type-check & test
+        security-review
+    secrets: inherit

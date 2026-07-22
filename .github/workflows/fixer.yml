@@ -1,0 +1,26 @@
+name: Fixer
+
+# Proposer stage: scans this repo, files bugs/features as issues with confidence labels.
+# Never opens a PR, never queues for build (issue-build.yml decides that). Runs on the
+# Claude Pro/Max subscription (CLAUDE_CODE_OAUTH_TOKEN), not a metered API key.
+# Deep tier of the 3-cadence proposer (see fixer-bugs.yml push-triggered / fixer-30m.yml
+# 12h). Scaffolded at Fixer Cadence v2 (warm tier) from day one — suxdash never carried
+# the pre-v2 metronome cadences.
+# Reusable workflow: SuxOS/.github/.github/workflows/fixer.yml
+
+on:
+  schedule:
+    - cron: "36 6 */3 * *" # Fixer Cadence v2: warm-tier every 3rd day ambitious-idea sweep
+  workflow_dispatch:
+
+jobs:
+  fixer:
+    permissions:
+      contents: read
+      issues: write
+      id-token: write
+    uses: SuxOS/.github/.github/workflows/fixer.yml@main
+    with:
+      max-turns: 40
+      scope: deep
+    secrets: inherit
