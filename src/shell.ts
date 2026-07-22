@@ -100,13 +100,19 @@ function payload() {
 
 document.getElementById("preview-btn").addEventListener("click", async function (e) {
   e.preventDefault();
-  var res = await fetch("/api/act/dispatch-issue?dry=1", {
-    method: "POST", headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(payload()),
-  });
-  var plan = await res.json();
-  document.getElementById("preview").textContent = plan.summary + "  →  " + plan.target;
-  document.getElementById("confirm-btn").disabled = false;
+  try {
+    var res = await fetch("/api/act/dispatch-issue?dry=1", {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload()),
+    });
+    var plan = await res.json();
+    if (!res.ok) throw new Error(plan && plan.error ? plan.error : "request failed");
+    document.getElementById("preview").textContent = plan.summary + "  →  " + plan.target;
+    document.getElementById("confirm-btn").disabled = false;
+  } catch (err) {
+    document.getElementById("preview").textContent = "error: " + err.message;
+    document.getElementById("confirm-btn").disabled = true;
+  }
 });
 
 document.getElementById("confirm-btn").addEventListener("click", async function (e) {
