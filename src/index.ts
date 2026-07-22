@@ -32,17 +32,21 @@ export default {
     }
 
     if (url.pathname === "/api/fabric") {
-      const { value, staleAt } = await cached(env.CACHE, "fabric:panel", 30, async () => {
-        const seam = githubFabricSeam(env.GITHUB_ORG, env.GITHUB_TOKEN);
-        return (await fabricPanel(seam, 0)).items; // items only; staleAt from cache wrapper
-      });
-      const panel = {
-        title: "Fabric",
-        items: value,
-        staleAt,
-        actions: [{ verb: "dispatch-issue", label: "File issue", kind: "confirm" }],
-      };
-      return Response.json(panel);
+      try {
+        const { value, staleAt } = await cached(env.CACHE, "fabric:panel", 30, async () => {
+          const seam = githubFabricSeam(env.GITHUB_ORG, env.GITHUB_TOKEN);
+          return (await fabricPanel(seam, 0)).items; // items only; staleAt from cache wrapper
+        });
+        const panel = {
+          title: "Fabric",
+          items: value,
+          staleAt,
+          actions: [{ verb: "dispatch-issue", label: "File issue", kind: "confirm" }],
+        };
+        return Response.json(panel);
+      } catch (err) {
+        return Response.json({ error: (err as Error).message }, { status: 502 });
+      }
     }
 
     if (url.pathname === "/api/act/dispatch-issue" && req.method === "POST") {
@@ -50,9 +54,13 @@ export default {
       if (url.searchParams.get("dry") === "1") {
         return Response.json(planDispatchIssue(input));
       }
-      const seam = githubIssueSeam(env.GITHUB_ORG, env.GITHUB_TOKEN);
-      const result = await executeDispatchIssue(input, seam);
-      return Response.json(result, { status: result.ok ? 200 : 400 });
+      try {
+        const seam = githubIssueSeam(env.GITHUB_ORG, env.GITHUB_TOKEN);
+        const result = await executeDispatchIssue(input, seam);
+        return Response.json(result, { status: result.ok ? 200 : 400 });
+      } catch (err) {
+        return Response.json({ ok: false, error: (err as Error).message }, { status: 502 });
+      }
     }
 
     return new Response("not found", { status: 404 });

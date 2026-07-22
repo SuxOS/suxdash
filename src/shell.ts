@@ -70,13 +70,20 @@ function itemNode(i) {
 }
 
 async function load() {
-  const res = await fetch("/api/fabric");
-  const p = await res.json();
+  var p;
+  try {
+    var res = await fetch("/api/fabric");
+    p = await res.json();
+    if (!res.ok) throw new Error(p && p.error ? p.error : "request failed");
+  } catch (err) {
+    document.getElementById("meta").textContent = "error: " + err.message;
+    return;
+  }
   const el = document.getElementById("panel");
   el.replaceChildren.apply(el, p.items.map(itemNode));
   var ageMs = p.staleAt - Date.now();
   document.getElementById("meta").textContent =
-    ageMs > 0 ? "fresh · refreshes in " + Math.round(ageMs / 1000) + "s"
+    ageMs > 0 ? "fresh · stale in " + Math.round(ageMs / 1000) + "s"
               : "stale — refresh to update";
   var bar = document.createElement("div");
   bar.style.margin = "1rem 0";
@@ -111,12 +118,16 @@ document.getElementById("preview-btn").addEventListener("click", async function 
 
 document.getElementById("confirm-btn").addEventListener("click", async function (e) {
   e.preventDefault();
-  var res = await fetch("/api/act/dispatch-issue", {
-    method: "POST", headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(payload()),
-  });
-  var out = await res.json();
-  document.getElementById("preview").textContent = out.ok ? "filed: " + out.url : "error: " + out.error;
+  try {
+    var res = await fetch("/api/act/dispatch-issue", {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload()),
+    });
+    var out = await res.json();
+    document.getElementById("preview").textContent = out.ok ? "filed: " + out.url : "error: " + out.error;
+  } catch (err) {
+    document.getElementById("preview").textContent = "error: " + err.message;
+  }
   document.getElementById("confirm-btn").disabled = true;
 });
 

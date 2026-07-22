@@ -27,10 +27,13 @@ export async function executeDispatchIssue(
   input: DispatchIssueInput,
   seam: GithubIssueSeam,
 ): Promise<ActionResult> {
-  if (!input.repo.trim() || !input.title.trim()) {
+  const repo = input.repo.trim();
+  const title = input.title.trim();
+  const body = input.body.trim();
+  if (!repo || !title) {
     return { ok: false, error: "repo and title are required" };
   }
-  const { url } = await seam.createIssue(input.repo, input.title, input.body);
+  const { url } = await seam.createIssue(repo, title, body);
   return { ok: true, url };
 }
 
