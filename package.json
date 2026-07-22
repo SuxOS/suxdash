@@ -1,0 +1,20 @@
+{
+  "name": "suxdash",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "secret": "wrangler secret put",
+    "type-check": "tsc --noEmit",
+    "test": "vitest run",
+    "cf-typegen": "wrangler types",
+    "ci": "npm run type-check && npm test"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^5.20260721.1",
+    "typescript": "7.0.2",
+    "vitest": "^4.1.10",
+    "wrangler": "^4.111.0"
+  }
+}
