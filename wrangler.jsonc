@@ -6,17 +6,15 @@
   "compatibility_flags": ["nodejs_compat"],
   "observability": { "enabled": true, "head_sampling_rate": 1 },
   "routes": [{ "pattern": "dash.suxos.net", "custom_domain": true }],
-  // KV read-through cache for GitHub reads. Create with:
-  //   npx wrangler kv namespace create CACHE
-  // then paste the returned id below.
-  "kv_namespaces": [{ "binding": "CACHE", "id": "REPLACE_WITH_KV_ID" }],
+  // KV read-through cache for GitHub reads ("suxdash-CACHE", created 2026-07-22).
+  "kv_namespaces": [{ "binding": "CACHE", "id": "d5550adaf7344fbe9ac5e0a6cdc17a7f" }],
   "vars": {
     "OPERATOR_EMAIL": "m@colinxs.com",
     "GITHUB_ORG": "SuxOS",
-    // Cloudflare Access team domain (e.g. "colinxs.cloudflareaccess.com") and the
-    // Access application AUD tag. Set real values when the Access app is created.
-    "ACCESS_TEAM_DOMAIN": "REPLACE_WITH_TEAM_DOMAIN",
-    "ACCESS_AUD": "REPLACE_WITH_ACCESS_AUD"
+    // Cloudflare Access team domain + the dash.suxos.net Access app's AUD tag
+    // (app c133faca-6b82-46dd-bf44-08347a1210ef, owner policy m@).
+    "ACCESS_TEAM_DOMAIN": "suxos.cloudflareaccess.com",
+    "ACCESS_AUD": "89db38112a2431642514ded46d7b71d065a0ae68a8951572245cce2576186165"
   }
   // Secret (out of band): GITHUB_TOKEN — fine-grained PAT with repo issues:write + read
   //   npx wrangler secret put GITHUB_TOKEN
