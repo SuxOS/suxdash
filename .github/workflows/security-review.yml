@@ -1,0 +1,42 @@
+name: Security review (no-dumb-shit bot)
+
+# Every PR gets a focused SECURITY review before it can merge, hard-blocking on a
+# high/critical finding by applying `hold`. Author-gated (never runs for fork/
+# external PRs). The reusable's job-name default ("security-review") already
+# matches the required check name the main-branch ruleset should list.
+# ready_for_review is required: the reusable skips draft PRs, and GitHub counts a
+# skipped required check as passing — omitting this type lets a PR go ready+merge
+# without the review ever re-running.
+#
+# pull_request_target is added ONLY to route Dependabot dep-bump PRs through a
+# secret-bearing base-repo context: GitHub withholds secrets (incl.
+# CLAUDE_CODE_OAUTH_TOKEN) from Dependabot pull_request runs, so the review goes inert
+# and this REQUIRED gate fails CLOSED forever on every dep bump (SuxOS/.github#621/#622).
+# The job `if` routes each PR to EXACTLY ONE trigger — dependabot[bot] →
+# pull_request_target, everyone else → pull_request — so the review never double-runs and
+# no untrusted human PR reaches the privileged context.
+# Reusable workflow: SuxOS/.github/.github/workflows/security-review.yml
+# Inert until CLAUDE_CODE_OAUTH_TOKEN is set (see the reusable's own preflight).
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+  pull_request_target:
+    types: [opened, synchronize, reopened, ready_for_review]
+
+jobs:
+  security-review:
+    if: >-
+      (github.event_name == 'pull_request' && github.event.pull_request.user.login != 'dependabot[bot]') ||
+      (github.event_name == 'pull_request_target' && github.event.pull_request.user.login == 'dependabot[bot]')
+    permissions:
+      contents: read
+      pull-requests: write
+      issues: write
+      id-token: write
+    uses: SuxOS/.github/.github/workflows/security-review.yml@main
+    with:
+      # dependabot[bot] must be allowed or claude-code-action refuses the bot PR and hard-fails
+      # this required gate (a mechanical block, not a finding). suxbot[bot] stays for bot builds.
+      allowed-bots: "suxbot[bot],dependabot[bot]"
+    secrets: inherit
