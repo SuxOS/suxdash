@@ -12,7 +12,7 @@
     "ci": "npm run type-check && npm test"
   },
   "devDependencies": {
-    "@cloudflare/workers-types": "^5.20260721.1",
+    "@cloudflare/workers-types": "^5.20260723.1",
     "typescript": "7.0.2",
     "vitest": "^4.1.10",
     "wrangler": "^4.111.0"
