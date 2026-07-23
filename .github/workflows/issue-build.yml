@@ -28,6 +28,11 @@ jobs:
     uses: SuxOS/.github/.github/workflows/issue-build.yml@main
     with:
       model-hint: sonnet  # sonnet only, no Opus escalation (operator directive)
+      # One effort:large (4 pts) or two mediums per batch. The default 10 packed three
+      # features into one 30-min sonnet session, which hit the reusable's build-job
+      # timeout on 5 straight attempts and livelocked (#18/#19/#20 retry loop; mechanism
+      # issue SuxOS/.github#701 — select re-derives the identical batch after a timeout).
+      effort-budget: 4
       gates-summary: |
         npm run type-check · npm test
     secrets: inherit
