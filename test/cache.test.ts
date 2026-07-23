@@ -27,4 +27,10 @@ describe("cached", () => {
     expect(value).toEqual({ n: 1 });
     expect(produce2).not.toHaveBeenCalled();
   });
+
+  it("clamps a below-floor TTL to Cloudflare KV's 60s minimum", async () => {
+    const kv = fakeKV();
+    await cached(kv, "k", 30, async () => ({ n: 1 }));
+    expect(kv.put).toHaveBeenCalledWith("k", expect.any(String), { expirationTtl: 60 });
+  });
 });

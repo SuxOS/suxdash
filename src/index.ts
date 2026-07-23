@@ -33,7 +33,7 @@ export default {
 
     if (url.pathname === "/api/fabric") {
       try {
-        const { value, staleAt } = await cached(env.CACHE, "fabric:panel", 30, async () => {
+        const { value, staleAt } = await cached(env.CACHE, "fabric:panel", 60, async () => {
           const seam = githubFabricSeam(env.GITHUB_ORG, env.GITHUB_TOKEN);
           return (await fabricPanel(seam, 0)).items; // items only; staleAt from cache wrapper
         });
