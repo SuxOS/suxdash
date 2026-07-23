@@ -23,6 +23,12 @@ export function planDispatchIssue(input: DispatchIssueInput): Plan {
   };
 }
 
+// GitHub repo names: alphanumeric, hyphen, underscore, dot — nothing that could act as a
+// URL path segment (no `/`, no `..`). createIssue interpolates this straight into a REST
+// URL (`repos/${org}/${repo}/issues`); an unvalidated value admits dot-segment escapes
+// (e.g. `../other-org/other-repo`) out of the intended org scope.
+const REPO_NAME_RE = /^[A-Za-z0-9._-]+$/;
+
 export async function executeDispatchIssue(
   input: DispatchIssueInput,
   seam: GithubIssueSeam,
@@ -32,6 +38,9 @@ export async function executeDispatchIssue(
   const body = input.body.trim();
   if (!repo || !title) {
     return { ok: false, error: "repo and title are required" };
+  }
+  if (!REPO_NAME_RE.test(repo)) {
+    return { ok: false, error: "repo must be a plain repository name (no slashes or path segments)" };
   }
   const { url } = await seam.createIssue(repo, title, body);
   return { ok: true, url };

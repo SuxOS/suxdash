@@ -30,4 +30,21 @@ describe("executeDispatchIssue", () => {
     expect(res.ok).toBe(false);
     expect(seam.createIssue).not.toHaveBeenCalled();
   });
+
+  it("rejects a repo value carrying a path segment (org-scope escape) without calling the seam", async () => {
+    const seam: GithubIssueSeam = { createIssue: vi.fn() };
+    const res = await executeDispatchIssue(
+      { repo: "../other-org/other-repo", title: "Add X", body: "why" },
+      seam,
+    );
+    expect(res.ok).toBe(false);
+    expect(seam.createIssue).not.toHaveBeenCalled();
+  });
+
+  it("rejects a repo value carrying a bare slash without calling the seam", async () => {
+    const seam: GithubIssueSeam = { createIssue: vi.fn() };
+    const res = await executeDispatchIssue({ repo: "sux/extra", title: "Add X", body: "why" }, seam);
+    expect(res.ok).toBe(false);
+    expect(seam.createIssue).not.toHaveBeenCalled();
+  });
 });
