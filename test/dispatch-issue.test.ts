@@ -47,4 +47,13 @@ describe("executeDispatchIssue", () => {
     expect(res.ok).toBe(false);
     expect(seam.createIssue).not.toHaveBeenCalled();
   });
+
+  it("rejects a bare dot-segment repo value without calling the seam", async () => {
+    const seam: GithubIssueSeam = { createIssue: vi.fn() };
+    for (const repo of [".", "..", "..."]) {
+      const res = await executeDispatchIssue({ repo, title: "Add X", body: "why" }, seam);
+      expect(res.ok).toBe(false);
+    }
+    expect(seam.createIssue).not.toHaveBeenCalled();
+  });
 });
